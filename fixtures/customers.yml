@@ -1,0 +1,11 @@
+App\Entity\Customer:
+  customer_{1..100}:
+    first_name: <firstName()>
+    last_name: <lastName()>
+    email: <email()>
+    country: <country()>
+    username: <userName()>
+    gender: <randomElement(['male', 'female'])>
+    city: <city()>
+    phone: <phoneNumber()>
+
