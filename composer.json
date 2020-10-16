@@ -5,13 +5,13 @@
         "php": ">=7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "api-platform/core": "^2.5",
         "composer/package-versions-deprecated": "^1.11",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.1",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.7",
-        "hautelook/alice-bundle": "^2.8",
         "nelmio/cors-bundle": "^2.1",
         "phpdocumentor/reflection-docblock": "^5.2",
         "symfony/asset": "5.1.*",
@@ -30,6 +30,8 @@
         "symfony/yaml": "5.1.*"
     },
     "require-dev": {
+        "justinrainbow/json-schema": "^5.2",
+        "hautelook/alice-bundle": "^2.8",
         "symfony/browser-kit": "^5.1",
         "symfony/css-selector": "^5.1",
         "symfony/maker-bundle": "^1.21",

@@ -2,11 +2,19 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use App\Dto\Customer\CollectionOutputDto;
+use App\Dto\Customer\ItemOutputDto;
 
 /**
+ * @ApiResource(
+ *     collectionOperations={"get": {"output": CollectionOutputDto::class}},
+ *     itemOperations={"get"={"output": ItemOutputDto::class}},
+ *     paginationEnabled=false
+ * )
  * @ORM\Entity(repositoryClass=CustomerRepository::class)
  * @UniqueEntity("email")
  */
@@ -161,5 +169,14 @@ class Customer
         $this->phone = $phone;
 
         return $this;
+    }
+
+    public function getFullName()
+    {
+        return sprintf(
+            '%s %s',
+            $this->getLastName(),
+            $this->getFirstName()
+        );
     }
 }
