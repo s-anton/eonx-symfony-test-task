@@ -8,3 +8,10 @@ api_platform:
     formats:
         json:
             mime_types: ['application/json']
+
+    # Enable the entrypoint.
+    enable_entrypoint: false
+
+    # Enable the docs.
+    enable_docs: false
+
