@@ -18,16 +18,4 @@ class CustomerRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Customer::class);
     }
-
-    public function getTotalCount()
-    {
-        try {
-            return $this->createQueryBuilder('c')
-                ->select('count(c.id)')
-                ->getQuery()
-                ->getSingleScalarResult();
-        } catch (\Throwable $e) {
-            return 0;
-        }
-    }
 }

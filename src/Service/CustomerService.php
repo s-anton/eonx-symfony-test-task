@@ -25,8 +25,11 @@ class CustomerService
     public $em;
     public $repository;
 
-    public function __construct(CustomerDataProvider $provider, EntityManagerInterface $em, CustomerRepository $repository)
-    {
+    public function __construct(
+        CustomerDataProvider $provider,
+        EntityManagerInterface $em,
+        CustomerRepository $repository
+    ) {
         $this->provider = $provider;
         $this->em = $em;
         $this->repository = $repository;
@@ -88,7 +91,11 @@ class CustomerService
         try {
             // If results does not exists php throws exception and we will catch it and return empty array
             // We dont respect any other exceptions for same reason
-            return $this->provider->loadUsers($this->numberPerRequest, $this->nationality)['results'];
+            $data = $this->provider
+                ->setNumberPerRequest($this->numberPerRequest)
+                ->setNationality($this->nationality)
+                ->loadUsers();
+            return $data['results'];
         } catch (\Throwable $e) {
             return [];
         }

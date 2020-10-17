@@ -7,13 +7,17 @@ use App\Service\CustomerService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\Exception;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class CustomerDataProvider
 {
-    private $url;
-    private $client;
-
     public const FIELDS_TO_RETRIEVE = 'name,email,location,gender,login,phone';
+
+    public $url;
+    public $client;
+
+    public $numberPerRequest;
+    public $nationality;
 
     public function __construct(HttpClientInterface $client, ParameterBagInterface $params)
     {
@@ -22,29 +26,52 @@ class CustomerDataProvider
     }
 
     /**
-     * @param int $numberPerRequest
-     * @param string|null $nationality
      * @return array
-     * @throws Exception\ClientExceptionInterface
-     * @throws Exception\DecodingExceptionInterface
-     * @throws Exception\RedirectionExceptionInterface
-     * @throws Exception\ServerExceptionInterface
+     */
+    public function loadUsers()
+    {
+        try {
+            return $this->makeRequest()->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * @return ResponseInterface
      * @throws Exception\TransportExceptionInterface
      */
-    public function loadUsers(
-        int $numberPerRequest = CustomerService::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST,
-        string $nationality = null
-    ): array {
+    public function makeRequest()
+    {
+        return $this->client->request('GET', $this->url, ['query' => $this->buildQueryParams(),]);
+    }
+
+    public function buildQueryParams(): array
+    {
         $queryParams = [
-            'results' => $numberPerRequest,
             'inc' => static::FIELDS_TO_RETRIEVE,
         ];
-        if (!empty($nationality)) {
-            $queryParams['nat'] = $nationality;
+        if (!empty($this->numberPerRequest)) {
+            $queryParams['results'] = $this->numberPerRequest;
+        }
+        if (!empty($this->nationality)) {
+            $queryParams['nat'] = $this->nationality;
         }
 
-        $response = $this->client->request('GET', $this->url, ['query' => $queryParams,]);
+        return $queryParams;
+    }
 
-        return $response->toArray();
+    public function setNumberPerRequest(int $numberPerRequest): self
+    {
+        $this->numberPerRequest = $numberPerRequest;
+
+        return $this;
+    }
+
+    public function setNationality(string $nationality): self
+    {
+        $this->nationality = $nationality;
+
+        return $this;
     }
 }

@@ -65,6 +65,8 @@ class CustomerServiceTest extends KernelTestCase
     public function testImportUsersFully()
     {
         $stub = $this->createMock(CustomerDataProvider::class);
+        $stub->method('setNumberPerRequest')->will(self::returnSelf());
+        $stub->method('setNationality')->will(self::returnSelf());
         $stub->method('loadUsers')->willReturn(
             [
                 'results' => [$this->createFakeData(),],
@@ -74,7 +76,7 @@ class CustomerServiceTest extends KernelTestCase
         $this->service->provider = $stub;
         $this->service->setNumberToImport(1);
 
-        self::assertEquals(true, $this->service->importUsers());
+        self::assertTrue($this->service->importUsers());
     }
 
     public function testImportUsersPartically()
@@ -82,6 +84,8 @@ class CustomerServiceTest extends KernelTestCase
         $this->deleteAllInCustomerTable();
 
         $stub = $this->createMock(CustomerDataProvider::class);
+        $stub->method('setNumberPerRequest')->will(self::returnSelf());
+        $stub->method('setNationality')->will(self::returnSelf());
         $stub->method('loadUsers')->willReturn(
             [
                 'results' => [
@@ -89,13 +93,18 @@ class CustomerServiceTest extends KernelTestCase
                     [
                         'invalid' => 'record',
                     ],
+                    [
+                        'email' => 'exists',
+                        'but' => 'other',
+                        'data' => 'is absent',
+                    ],
                 ],
             ]
         );
         $this->service->provider = $stub;
         $this->service->setNumberToImport(2);
 
-        self::assertEquals(false, $this->service->importUsers());
+        self::assertFalse($this->service->importUsers());
         self::assertEquals(1, $this->em->getRepository(Customer::class)->count([]));
     }
 
@@ -109,6 +118,8 @@ class CustomerServiceTest extends KernelTestCase
         $changedData['phone'] = $newPhone;
 
         $stub = $this->createMock(CustomerDataProvider::class);
+        $stub->method('setNumberPerRequest')->will(self::returnSelf());
+        $stub->method('setNationality')->will(self::returnSelf());
         $stub->method('loadUsers')->willReturn(
             [
                 'results' => [$data, $changedData],
