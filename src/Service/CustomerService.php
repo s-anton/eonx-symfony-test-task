@@ -5,6 +5,7 @@ namespace App\Service;
 
 use App\DataProvider\CustomerDataProvider;
 use App\Entity\Customer;
+use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class CustomerService
@@ -16,17 +17,19 @@ class CustomerService
     public const ENTITY_WAS_CREATED = 1;
     public const ENTITY_WAS_UPDATED = 2;
 
-    private $provider;
-    private $em;
+    public $numberPerRequest = self::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST;
+    public $numberToImport = self::DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED;
+    public $nationality = self::DEFAULT_NATIONALITY_CODE;
 
-    private $numberPerRequest = self::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST;
-    private $numberToImport = self::DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED;
-    private $nationality = self::DEFAULT_NATIONALITY_CODE;
+    public $provider;
+    public $em;
+    public $repository;
 
-    public function __construct(CustomerDataProvider $provider, EntityManagerInterface $em)
+    public function __construct(CustomerDataProvider $provider, EntityManagerInterface $em, CustomerRepository $repository)
     {
         $this->provider = $provider;
         $this->em = $em;
+        $this->repository = $repository;
     }
 
     /**
@@ -49,8 +52,6 @@ class CustomerService
 
             $importedCount += $count;
         }
-
-        $this->em->flush();
 
         return $importedCount === $this->numberToImport;
     }
@@ -82,7 +83,7 @@ class CustomerService
      *
      * @return array
      */
-    private function loadPortion(): array
+    protected function loadPortion(): array
     {
         try {
             // If results does not exists php throws exception and we will catch it and return empty array
@@ -99,7 +100,7 @@ class CustomerService
      * @param array $data
      * @return int
      */
-    private function handleIncomingData(array $data): int
+    protected function handleIncomingData(array $data): int
     {
         $importedCount = 0;
         foreach ($data as $entry) {
@@ -120,15 +121,16 @@ class CustomerService
      * @param array $data
      * @return false|int
      */
-    private function makeOrUpdateCustomerEntity(array $data)
+    protected function makeOrUpdateCustomerEntity(array $data)
     {
         if (!isset($data['email'])) {
             return false;
         }
         $email = $data['email'];
-        $repository = $this->em->getRepository(Customer::class);
-
-        $existed = $repository->findOneBy(['email' => $email]);
+        /**
+         * TODO need to write something more effective
+         */
+        $existed = $this->repository->findOneBy(['email' => $email]);
         $result = $existed instanceof Customer ? self::ENTITY_WAS_UPDATED : self::ENTITY_WAS_CREATED;
 
         $customer = $existed ?? new Customer();
@@ -146,6 +148,7 @@ class CustomerService
         }
 
         $this->em->persist($customer);
+        $this->em->flush();
 
         return $result;
     }

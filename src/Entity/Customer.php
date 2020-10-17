@@ -56,7 +56,7 @@ class Customer
     private $username;
 
     /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('male', 'female')")
+     * @ORM\Column(type="string", columnDefinition="GENDER_TYPE NOT NULL")
      */
     private $gender;
 
