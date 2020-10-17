@@ -1,0 +1,152 @@
+<?php
+
+namespace App\Service;
+
+
+use App\DataProvider\CustomerDataProvider;
+use App\Entity\Customer;
+use Doctrine\ORM\EntityManagerInterface;
+
+class CustomerService
+{
+    public const DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED = 100;
+    public const DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST = 100;
+    public const DEFAULT_NATIONALITY_CODE = 'au';
+
+    public const ENTITY_WAS_CREATED = 1;
+    public const ENTITY_WAS_UPDATED = 2;
+
+    private $provider;
+    private $em;
+
+    private $numberPerRequest = self::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST;
+    private $numberToImport = self::DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED;
+    private $nationality = self::DEFAULT_NATIONALITY_CODE;
+
+    public function __construct(CustomerDataProvider $provider, EntityManagerInterface $em)
+    {
+        $this->provider = $provider;
+        $this->em = $em;
+    }
+
+    /**
+     * This function tries to import new users until provided count of records will be reached
+     *
+     * @return bool
+     */
+    public function importUsers(): bool
+    {
+        $importedCount = 0;
+        while ($importedCount < $this->numberToImport) {
+            $portion = $this->loadPortion();
+            $count = $this->handleIncomingData($portion);
+
+            if ($count === 0) {
+                // Nothing imported, it can be for various reasons, but we just
+                // break the cycle because its just test task
+                break;
+            }
+
+            $importedCount += $count;
+        }
+
+        $this->em->flush();
+
+        return $importedCount === $this->numberToImport;
+    }
+
+    public function setNationality(string $code): CustomerService
+    {
+        $this->nationality = $code;
+
+        return $this;
+    }
+
+    public function setNumberPerRequest(int $numberPerRequest): CustomerService
+    {
+        $this->numberPerRequest = $numberPerRequest ?? self::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST;
+
+        return $this;
+    }
+
+    public function setNumberToImport(int $numberToImport): CustomerService
+    {
+        $this->numberToImport = $numberToImport ?? self::DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED;
+
+        return $this;
+    }
+
+    /**
+     * Function loads data using data-provider class
+     * We dont respect pagination because external api returns different result for same requests
+     *
+     * @return array
+     */
+    private function loadPortion(): array
+    {
+        try {
+            // If results does not exists php throws exception and we will catch it and return empty array
+            // We dont respect any other exceptions for same reason
+            return $this->provider->loadUsers($this->numberPerRequest, $this->nationality)['results'];
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Function handles incoming data and returns count of new records
+     *
+     * @param array $data
+     * @return int
+     */
+    private function handleIncomingData(array $data): int
+    {
+        $importedCount = 0;
+        foreach ($data as $entry) {
+            $result = $this->makeOrUpdateCustomerEntity($entry);
+            if ($result === static::ENTITY_WAS_CREATED) {
+                $importedCount++;
+            }
+        }
+
+        return $importedCount;
+    }
+
+    /**
+     * This function makes or updates Customer entity
+     * Returns int for success, false otherwise
+     * int result can be 1 ot 2, 1 for create, 2 for update
+     *
+     * @param array $data
+     * @return false|int
+     */
+    private function makeOrUpdateCustomerEntity(array $data)
+    {
+        if (!isset($data['email'])) {
+            return false;
+        }
+        $email = $data['email'];
+        $repository = $this->em->getRepository(Customer::class);
+
+        $existed = $repository->findOneBy(['email' => $email]);
+        $result = $existed instanceof Customer ? self::ENTITY_WAS_UPDATED : self::ENTITY_WAS_CREATED;
+
+        $customer = $existed ?? new Customer();
+        try {
+            $customer->setGender($data['gender']);
+            $customer->setPhone($data['phone']);
+            $customer->setUsername($data['login']['username']);
+            $customer->setLastName($data['name']['last']);
+            $customer->setFirstName($data['name']['first']);
+            $customer->setEmail($email);
+            $customer->setCountry($data['location']['country']);
+            $customer->setCity($data['location']['city']);
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        $this->em->persist($customer);
+
+        return $result;
+    }
+}
