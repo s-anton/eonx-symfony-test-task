@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Entity\Customer;
 use Doctrine\ORM\EntityManagerInterface;
 use Faker\Factory;
 
@@ -14,7 +15,10 @@ trait CustomerHelpersTrait
         $em->createQuery('DELETE FROM App\Entity\Customer as c')->execute();
     }
 
-    public function createFakeData()
+    /**
+     * @return array
+     */
+    public function createFakeData(): array
     {
         $faker = Factory::create();
 
@@ -34,5 +38,22 @@ trait CustomerHelpersTrait
                 'city' => $faker->city,
             ],
         ];
+    }
+
+    public function createFakeCustomer(): Customer
+    {
+        $faker = Factory::create();
+
+        $c = new Customer();
+        $c->setGender($faker->randomElement(['male', 'female']));
+        $c->setPhone($faker->phoneNumber);
+        $c->setUsername($faker->userName);
+        $c->setLastName($faker->lastName);
+        $c->setFirstName($faker->firstName);
+        $c->setEmail($faker->email);
+        $c->setCountry($faker->country);
+        $c->setCity($faker->city);
+
+        return $c;
     }
 }

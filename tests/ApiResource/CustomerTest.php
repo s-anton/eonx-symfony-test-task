@@ -53,7 +53,7 @@ class CustomerTest extends ApiTestCase
         static::assertEquals($repo->count([]), \count($response->toArray())); // service must return all records
 
         $item = $response->toArray()[0];
-        self::assertSame(['id', 'fullName', 'email', 'country'], array_keys($item));
+        self::assertEqualsCanonicalizing(['id', 'fullName', 'email', 'country'], array_keys($item));
     }
 
     public function testGetItem()
@@ -74,7 +74,7 @@ class CustomerTest extends ApiTestCase
         );
 
         $responseData = $response->toArray();
-        self::assertSame(
+        self::assertEqualsCanonicalizing(
             [
                 'id' => $customer->getId(),
                 'fullName' => $customer->getFullName(),

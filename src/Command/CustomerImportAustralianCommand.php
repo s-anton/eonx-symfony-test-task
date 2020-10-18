@@ -59,14 +59,14 @@ class CustomerImportAustralianCommand extends Command
             ->importUsers();
 
         if ($result) {
-            $io->success('Success, try to use api');
+            $io->text('Success');
         } else {
             $count = $this->em->getRepository(Customer::class)->count([]);
 
             if ($count > 0) {
-                $io->error('Failure, but database contains previously created records');
+                $io->text('Failure, but database contains previously created records');
             } else {
-                $io->error('Failure. something happened');
+                $io->text('Failure, something happened');
             }
 
         }

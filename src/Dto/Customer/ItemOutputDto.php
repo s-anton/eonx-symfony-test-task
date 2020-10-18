@@ -2,7 +2,11 @@
 
 namespace App\Dto\Customer;
 
-
+/**
+ * Class ItemOutputDto
+ * @package App\Dto\Customer
+ * @codeCoverageIgnore - it will be tests as schema test in CustomerTest::testGetItem
+ */
 class ItemOutputDto
 {
     public $id;
