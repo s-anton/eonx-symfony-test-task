@@ -46,7 +46,7 @@ class CustomerTest extends ApiTestCase
     {
         $response = static::createClient()->request(
             'GET',
-            '/api/customers',
+            '/customers',
             [
                 'headers' => [
                     'Accept' => 'application/json',
@@ -74,7 +74,7 @@ class CustomerTest extends ApiTestCase
 
         $response = static::createClient()->request(
             'GET',
-            sprintf('/api/customers/%d', $customer->getId()),
+            sprintf('/customers/%d', $customer->getId()),
             [
                 'headers' => [
                     'Accept' => 'application/json',

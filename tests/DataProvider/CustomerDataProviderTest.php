@@ -29,7 +29,7 @@ class CustomerDataProviderTest extends WebTestCase
         $this->provider->client = new MockHttpClient($response);
 
         try {
-            $body = json_decode($body, true, 1, JSON_THROW_ON_ERROR);
+            $body = json_decode($body, true, 2, JSON_THROW_ON_ERROR);
         } catch (\Throwable $e) {
             $body = null;
         }
