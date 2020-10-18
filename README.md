@@ -23,5 +23,5 @@
 ### With symfony cli
 1. ```symfony project:create``` - provide ```title``` and ```plan```
 2. ```symfony deploy```
-3. Check provided link (with /customers and /customers/<id> of course)
+3. Check provided link (with ```/customers``` and ```/customers/<id>``` of course)
 
