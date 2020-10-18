@@ -47,5 +47,8 @@ hooks:
 
     (>&2 symfony-deploy)
 
+  post_deploy: |
+    symfony console c:i:a
+
 relationships:
   database: "db:postgresql"
