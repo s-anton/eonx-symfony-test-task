@@ -31,6 +31,11 @@ class CustomerServiceTest extends KernelTestCase
         $this->em = (self::bootKernel())->getContainer()->get('doctrine')->getManager();
     }
 
+    protected function tearDown(): void
+    {
+        $this->deleteAllInCustomerTable();
+    }
+
     public function testNationalitySettedCorrectly()
     {
         $code = 'aaaa';

@@ -5,12 +5,14 @@ namespace App\Tests\ApiResource;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
+use App\Tests\CustomerHelpersTrait;
 use Doctrine\ORM\EntityManagerInterface;
-use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
+use Hautelook\AliceBundle\PhpUnit\BaseDatabaseTrait;
 
 class CustomerTest extends ApiTestCase
 {
-    use RefreshDatabaseTrait;
+    use BaseDatabaseTrait;
+    use CustomerHelpersTrait;
 
     /** @var EntityManagerInterface $em */
     private $em;
@@ -20,6 +22,13 @@ class CustomerTest extends ApiTestCase
         parent::setUp();
 
         $this->em = (self::bootKernel())->getContainer()->get('doctrine')->getManager();
+
+        self::populateDatabase();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->deleteAllInCustomerTable();
     }
 
     /**

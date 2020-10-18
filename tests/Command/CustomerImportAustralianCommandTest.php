@@ -15,6 +15,11 @@ class CustomerImportAustralianCommandTest extends KernelTestCase
 {
     use CustomerHelpersTrait;
 
+    protected function tearDown(): void
+    {
+        $this->deleteAllInCustomerTable();
+    }
+
     public function testExecuteWhenFailure()
     {
         $this->deleteAllInCustomerTable();
