@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-
 use App\DataProvider\CustomerDataProvider;
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
@@ -24,6 +23,8 @@ class CustomerService
     public $provider;
     public $em;
     public $repository;
+
+    protected $existedRecords = [];
 
     public function __construct(
         CustomerDataProvider $provider,
@@ -95,6 +96,7 @@ class CustomerService
                 ->setNumberPerRequest($this->numberPerRequest)
                 ->setNationality($this->nationality)
                 ->loadUsers();
+
             return $data['results'];
         } catch (\Throwable $e) {
             return [];
@@ -109,6 +111,7 @@ class CustomerService
      */
     protected function handleIncomingData(array $data): int
     {
+        $this->fillExistedRecords($data);
         $importedCount = 0;
         foreach ($data as $entry) {
             $result = $this->makeOrUpdateCustomerEntity($entry);
@@ -117,7 +120,44 @@ class CustomerService
             }
         }
 
+        foreach ($this->existedRecords as $record) {
+            $this->em->persist($record);
+        }
+        $this->em->flush();
+
         return $importedCount;
+    }
+
+    /**
+     * Preload records
+     *
+     * @param $data
+     */
+    protected function fillExistedRecords($data): void
+    {
+        $this->existedRecords = [];
+        $emails = array_filter(
+            array_unique(
+                array_map(
+                    static function ($item) {
+                        return $item['email'] ?? null;
+                    },
+                    $data
+                )
+            )
+        );
+        $results = $this->em->createQueryBuilder()
+            ->select('c')
+            ->from('App:Customer', 'c')
+            ->where('c.email in (:emails)')
+            ->setParameter('emails', $emails)
+            ->getQuery()
+            ->getResult();
+        /** @var Customer $customer */
+        foreach ($results as $customer) {
+            $this->existedRecords[$customer->getEmail()] = $customer;
+
+        }
     }
 
     /**
@@ -134,10 +174,7 @@ class CustomerService
             return false;
         }
         $email = $data['email'];
-        /**
-         * TODO need to write something more effective
-         */
-        $existed = $this->repository->findOneBy(['email' => $email]);
+        $existed = $this->existedRecords[$email] ?? null;
         $result = $existed instanceof Customer ? self::ENTITY_WAS_UPDATED : self::ENTITY_WAS_CREATED;
 
         $customer = $existed ?? new Customer();
@@ -154,8 +191,7 @@ class CustomerService
             return false;
         }
 
-        $this->em->persist($customer);
-        $this->em->flush();
+        $this->existedRecords[$email] = $customer;
 
         return $result;
     }
