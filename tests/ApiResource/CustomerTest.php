@@ -17,7 +17,7 @@ class CustomerTest extends ApiTestCase
     /** @var EntityManagerInterface $em */
     private $em;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -42,7 +42,7 @@ class CustomerTest extends ApiTestCase
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    public function testGetCollection()
+    public function testGetCollection(): void
     {
         $response = static::createClient()->request(
             'GET',
@@ -65,7 +65,7 @@ class CustomerTest extends ApiTestCase
         self::assertEqualsCanonicalizing(['id', 'fullName', 'email', 'country'], array_keys($item));
     }
 
-    public function testGetItem()
+    public function testGetItem(): void
     {
         /** @var CustomerRepository $repo */
         $repo = $this->em->getRepository(Customer::class);

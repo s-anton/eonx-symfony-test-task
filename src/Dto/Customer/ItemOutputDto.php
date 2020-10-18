@@ -9,12 +9,12 @@ namespace App\Dto\Customer;
  */
 class ItemOutputDto
 {
-    public $id;
-    public $fullName;
-    public $email;
-    public $country;
-    public $username;
-    public $gender;
-    public $city;
-    public $phone;
+    public int $id;
+    public string $fullName;
+    public string $email;
+    public string $country;
+    public string $username;
+    public string $gender;
+    public string $city;
+    public string $phone;
 }

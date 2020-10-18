@@ -8,7 +8,7 @@ use Faker\Factory;
 
 trait CustomerHelpersTrait
 {
-    public function deleteAllInCustomerTable()
+    public function deleteAllInCustomerTable(): void
     {
         /** @var EntityManagerInterface $em */
         $em = (self::bootKernel())->getContainer()->get('doctrine')->getManager();

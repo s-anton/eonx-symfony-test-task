@@ -10,26 +10,34 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class CustomerDataProviderTest extends WebTestCase
 {
-    protected $provider;
+    protected CustomerDataProvider $provider;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->provider = (self::bootKernel())->getContainer()->get(CustomerDataProvider::class);
+        /** @var CustomerDataProvider $provider */
+        $provider = (self::bootKernel())->getContainer()->get(CustomerDataProvider::class);
+        $this->provider = $provider;
     }
 
-    public function testLoadUsersNormal()
+    public function testLoadUsersNormal(): void
     {
         $body = '{"body":"response"}';
 
         $response = new MockResponse($body);
         $this->provider->client = new MockHttpClient($response);
 
-        self::assertSame(json_decode($body, true), $this->provider->loadUsers());
+        try {
+            $body = json_decode($body, true, 1, JSON_THROW_ON_ERROR);
+        } catch (\Throwable $e) {
+            $body = null;
+        }
+
+        self::assertSame($body, $this->provider->loadUsers());
     }
 
-    public function testLoadUserAbnormal()
+    public function testLoadUserAbnormal(): void
     {
         $response = new MockResponse('some-non-json-like-content');
         $this->provider->client = new MockHttpClient($response);
@@ -37,7 +45,7 @@ class CustomerDataProviderTest extends WebTestCase
         self::assertSame([], $this->provider->loadUsers());
     }
 
-    public function testMakeRequest()
+    public function testMakeRequest(): void
     {
         $this->provider->client = new MockHttpClient(new MockResponse());
 
@@ -45,7 +53,7 @@ class CustomerDataProviderTest extends WebTestCase
         self::assertInstanceOf(ResponseInterface::class, $request);
     }
 
-    public function testBuildParamsCustom()
+    public function testBuildParamsCustom(): void
     {
         $this->provider->setNumberPerRequest(200);
         $this->provider->setNationality('ru');
@@ -56,7 +64,7 @@ class CustomerDataProviderTest extends WebTestCase
         );
     }
 
-    public function testBuildParamsDefault()
+    public function testBuildParamsDefault(): void
     {
         self::assertEqualsCanonicalizing(
             ['inc' => CustomerDataProvider::FIELDS_TO_RETRIEVE,],

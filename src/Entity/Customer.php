@@ -28,47 +28,47 @@ class Customer
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $first_name;
+    private string $first_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $last_name;
+    private string $last_name;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $email;
+    private string $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $country;
+    private string $country;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $username;
+    private string $username;
 
     /**
      * @ORM\Column(type="string", columnDefinition="GENDER_TYPE NOT NULL")
      */
-    private $gender;
+    private string $gender;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $city;
+    private string $city;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $phone;
+    private string $phone;
 
     public function getId(): ?int
     {
@@ -171,7 +171,7 @@ class Customer
         return $this;
     }
 
-    public function getFullName()
+    public function getFullName(): string
     {
         return sprintf(
             '%s %s',

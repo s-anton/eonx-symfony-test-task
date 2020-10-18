@@ -9,8 +9,8 @@ namespace App\Dto\Customer;
  */
 class CollectionOutputDto
 {
-    public $id;
-    public $fullName;
-    public $email;
-    public $country;
+    public int $id;
+    public string $fullName;
+    public string $email;
+    public string $country;
 }

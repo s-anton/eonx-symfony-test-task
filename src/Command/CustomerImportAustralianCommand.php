@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Customer;
+use App\Repository\CustomerRepository;
 use App\Service\CustomerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -15,8 +16,8 @@ class CustomerImportAustralianCommand extends Command
 {
     protected static $defaultName = 'customer:import:australian';
 
-    protected $service;
-    protected $em;
+    protected CustomerService $service;
+    protected EntityManagerInterface $em;
 
     public function __construct(CustomerService $service, EntityManagerInterface $em)
     {
@@ -25,7 +26,7 @@ class CustomerImportAustralianCommand extends Command
         $this->em = $em;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName(static::$defaultName)
@@ -50,8 +51,8 @@ class CustomerImportAustralianCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $numberToImport = $input->getOption('number');
-        $numberPerRequest = $input->getOption('load-step');
+        $numberToImport = (int)$input->getOption('number');
+        $numberPerRequest = (int)$input->getOption('load-step');
 
         $result = $this->service
             ->setNumberPerRequest($numberPerRequest)
@@ -61,7 +62,9 @@ class CustomerImportAustralianCommand extends Command
         if ($result) {
             $io->text('Success');
         } else {
-            $count = $this->em->getRepository(Customer::class)->count([]);
+            /** @var CustomerRepository $customerRepository */
+            $customerRepository = $this->em->getRepository(Customer::class);
+            $count = $customerRepository->count([]);
 
             if ($count > 0) {
                 $io->text('Failure, but database contains previously created records');

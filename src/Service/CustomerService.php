@@ -16,15 +16,15 @@ class CustomerService
     public const ENTITY_WAS_CREATED = 1;
     public const ENTITY_WAS_UPDATED = 2;
 
-    public $numberPerRequest = self::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST;
-    public $numberToImport = self::DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED;
-    public $nationality = self::DEFAULT_NATIONALITY_CODE;
+    public int $numberPerRequest = self::DEFAULT_NUMBER_OF_LOADED_USERS_PER_REQUEST;
+    public int $numberToImport = self::DEFAULT_NUMBER_OF_USERS_TO_BE_REACHED;
+    public string $nationality = self::DEFAULT_NATIONALITY_CODE;
 
-    public $provider;
-    public $em;
-    public $repository;
+    public CustomerDataProvider $provider;
+    public EntityManagerInterface $em;
+    public CustomerRepository $repository;
 
-    protected $existedRecords = [];
+    protected array $existedRecords = [];
 
     public function __construct(
         CustomerDataProvider $provider,
@@ -131,9 +131,9 @@ class CustomerService
     /**
      * Preload records
      *
-     * @param $data
+     * @param array $data
      */
-    protected function fillExistedRecords($data): void
+    protected function fillExistedRecords(array $data): void
     {
         $this->existedRecords = [];
         $emails = array_filter(

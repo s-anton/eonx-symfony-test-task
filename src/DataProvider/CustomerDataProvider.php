@@ -13,11 +13,11 @@ class CustomerDataProvider
 {
     public const FIELDS_TO_RETRIEVE = 'name,email,location,gender,login,phone';
 
-    public $url;
-    public $client;
+    public string $url;
+    public HttpClientInterface $client;
 
-    public $numberPerRequest;
-    public $nationality;
+    public int $numberPerRequest;
+    public string $nationality;
 
     public function __construct(HttpClientInterface $client, ParameterBagInterface $params)
     {
@@ -28,7 +28,7 @@ class CustomerDataProvider
     /**
      * @return array
      */
-    public function loadUsers()
+    public function loadUsers(): array
     {
         try {
             return $this->makeRequest()->toArray();

@@ -20,7 +20,7 @@ class CustomerImportAustralianCommandTest extends KernelTestCase
         $this->deleteAllInCustomerTable();
     }
 
-    public function testExecuteWhenFailure()
+    public function testExecuteWhenFailure(): void
     {
         $this->deleteAllInCustomerTable();
 
@@ -39,7 +39,6 @@ class CustomerImportAustralianCommandTest extends KernelTestCase
         $em = $kernel->getContainer()->get('doctrine.orm.entity_manager');
 
         $service = new CustomerService($stub, $em, $em->getRepository(Customer::class));
-        $service->provider = $stub;
 
         $kernel->getContainer()->set(CustomerService::class, $service);
 
@@ -62,7 +61,7 @@ class CustomerImportAustralianCommandTest extends KernelTestCase
         self::assertEquals("\n Failure, but database contains previously created records\n", $output);
     }
 
-    public function testExecuteWhenSuccess()
+    public function testExecuteWhenSuccess(): void
     {
         $kernel = self::bootKernel();
         $application = new Application($kernel);

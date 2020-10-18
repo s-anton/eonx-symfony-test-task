@@ -4,6 +4,7 @@ namespace App\Tests\Service;
 
 use App\DataProvider\CustomerDataProvider;
 use App\Entity\Customer;
+use App\Repository\CustomerRepository;
 use App\Service\CustomerService;
 use App\Tests\CustomerHelpersTrait;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,21 +14,20 @@ class CustomerServiceTest extends KernelTestCase
 {
     use CustomerHelpersTrait;
 
-    /**
-     * @var CustomerService
-     */
-    protected $service;
+    protected CustomerService $service;
 
     /**
      * @var EntityManagerInterface
      */
     protected $em;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->service = (self::bootKernel())->getContainer()->get(CustomerService::class);
+        /** @var CustomerService $service */
+        $service = (self::bootKernel())->getContainer()->get(CustomerService::class);
+        $this->service = $service;
         $this->em = (self::bootKernel())->getContainer()->get('doctrine')->getManager();
     }
 
@@ -36,28 +36,28 @@ class CustomerServiceTest extends KernelTestCase
         $this->deleteAllInCustomerTable();
     }
 
-    public function testNationalitySettedCorrectly()
+    public function testNationalitySettedCorrectly(): void
     {
         $code = 'aaaa';
         $this->service->setNationality($code);
         self::assertEquals($code, $this->service->nationality);
     }
 
-    public function testNumberPerRequestSettedCorrectly()
+    public function testNumberPerRequestSettedCorrectly(): void
     {
         $num = 123;
         $this->service->setNumberPerRequest($num);
         self::assertEquals($num, $this->service->numberPerRequest);
     }
 
-    public function testNumberToImportSettedConrrectly()
+    public function testNumberToImportSettedConrrectly(): void
     {
         $num = 321;
         $this->service->setNumberToImport($num);
         self::assertEquals($num, $this->service->numberToImport);
     }
 
-    public function testImportUsersEmpty()
+    public function testImportUsersEmpty(): void
     {
         $stub = $this->createMock(CustomerDataProvider::class);
         $stub->method('loadUsers')->willReturn([]);
@@ -67,7 +67,7 @@ class CustomerServiceTest extends KernelTestCase
         self::assertEquals(false, $this->service->importUsers());
     }
 
-    public function testImportUsersFully()
+    public function testImportUsersFully(): void
     {
         $stub = $this->createMock(CustomerDataProvider::class);
         $stub->method('setNumberPerRequest')->will(self::returnSelf());
@@ -84,7 +84,7 @@ class CustomerServiceTest extends KernelTestCase
         self::assertTrue($this->service->importUsers());
     }
 
-    public function testImportUsersPartically()
+    public function testImportUsersPartically(): void
     {
         $this->deleteAllInCustomerTable();
 
@@ -109,11 +109,14 @@ class CustomerServiceTest extends KernelTestCase
         $this->service->provider = $stub;
         $this->service->setNumberToImport(2);
 
+        /** @var CustomerRepository $repo */
+        $repo = $this->em->getRepository(Customer::class);
+
         self::assertFalse($this->service->importUsers());
-        self::assertEquals(1, $this->em->getRepository(Customer::class)->count([]));
+        self::assertEquals(1, $repo->count([]));
     }
 
-    public function testImportUsersUpdateRecordIfEmailExists()
+    public function testImportUsersUpdateRecordIfEmailExists(): void
     {
         $this->deleteAllInCustomerTable();
 
